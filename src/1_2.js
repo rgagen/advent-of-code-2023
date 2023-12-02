@@ -1,6 +1,6 @@
 const fs = require("fs");
 
-const inputString = fs.readFileSync("input/input1_1.txt", "utf8").split("\n");
+const inputString = fs.readFileSync("../input/input1_1.txt", "utf8").split("\n");
 
 let output = 0;
 
@@ -48,10 +48,6 @@ for (const line of inputString) {
   }
 
   output += line_output
-
-  console.log(line);
-  console.log(digit_array);
-  console.log(line_output);
 }
 
 console.log(output);

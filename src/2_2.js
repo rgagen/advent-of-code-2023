@@ -1,6 +1,6 @@
 const fs = require("fs");
 
-const inputString = fs.readFileSync("input/input2_1.txt", "utf8").split("\n");
+const inputString = fs.readFileSync("../input/input2_1.txt", "utf8").split("\n");
 
 let currentTotal = 0;
 
@@ -17,12 +17,15 @@ for (let line of inputString) {
   );
 
   reveals = reveals.map((reveal) => {
-    let revealObject = {};
+    let revealObject = {
+      red: undefined,
+      green: undefined,
+      blue: undefined
+    };
 
     while(reveal.length > 1) {
       let color = reveal.pop();
-      let number = parseInt(reveal.pop());
-      revealObject[color] = number;
+      revealObject[color] = parseInt(reveal.pop());
     }
 
     return revealObject
@@ -32,7 +35,7 @@ for (let line of inputString) {
   let blueMin = 0;
   let greenMin = 0;
 
-  for (revealObject of reveals) {
+  for (let revealObject of reveals) {
     if (revealObject.red > redMin) {
       redMin = revealObject.red
     }
@@ -43,9 +46,6 @@ for (let line of inputString) {
       blueMin = revealObject.blue
     }
   }
-
-  console.log(reveals);
-  console.log(`red: ${redMin} blue: ${blueMin} green: ${greenMin}`)
 
   const power = redMin * blueMin * greenMin;
   currentTotal += power;
