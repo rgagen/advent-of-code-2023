@@ -12,9 +12,7 @@ for (let line of inputString) {
   let trimIndex = line.indexOf(":");
   line = line.substring(trimIndex + 2);
 
-  let reveals = line.split(";");
-  let extractionRegex = /\d+|[\w]+/g;
-  reveals = reveals.map((reveal) =>
+  let reveals = line.split(";").map((reveal) =>
     reveal.trim().replaceAll(",", "").split(" ")
   );
 
@@ -29,8 +27,6 @@ for (let line of inputString) {
 
     return revealObject
   });
-
-  let impossibleGameFlag = null;
 
   let redMin = 0;
   let blueMin = 0;
