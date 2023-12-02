@@ -11,13 +11,11 @@ for (let line of inputString) {
   }
 
   currentGame += 1;
-  console.log(`Game ${currentGame}`)
 
   let trimIndex = line.indexOf(":");
   line = line.substring(trimIndex + 2);
 
   let reveals = line.split(";");
-  let extractionRegex = /\d+|[\w]+/g;
   reveals = reveals.map((reveal) =>
     reveal.trim().replaceAll(",", "").split(" ")
   );
@@ -37,9 +35,7 @@ for (let line of inputString) {
   let impossibleGameFlag = null;
 
   for (revealObject of reveals) {
-    console.log(revealObject);
     if (revealObject.red > 12 || revealObject.green > 13 || revealObject.blue > 14) {
-        console.log('IMPOSSIBLE GAME');
         impossibleGameFlag = true;
         break;
     }
@@ -47,7 +43,6 @@ for (let line of inputString) {
 
   if (!impossibleGameFlag) {
     currentTotal += currentGame;
-    console.log(`${currentTotal} - after adding ${currentGame}`)
   }
 }
 

@@ -44,9 +44,6 @@ for (let line of inputString) {
     }
   }
 
-  console.log(reveals);
-  console.log(`red: ${redMin} blue: ${blueMin} green: ${greenMin}`)
-
   const power = redMin * blueMin * greenMin;
   currentTotal += power;
 }

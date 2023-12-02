@@ -48,10 +48,6 @@ for (const line of inputString) {
   }
 
   output += line_output
-
-  console.log(line);
-  console.log(digit_array);
-  console.log(line_output);
 }
 
 console.log(output);
