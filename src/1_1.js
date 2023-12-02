@@ -29,4 +29,4 @@ for (const line of inputString) {
     output += line_output
 }
 
-console.log(output)
+console.log(output) 
