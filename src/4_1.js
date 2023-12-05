@@ -1,7 +1,7 @@
 const fs = require("fs");
 
 let input = fs
-  .readFileSync("./input/input.txt", "utf-8")
+  .readFileSync("../input/input5.txt", "utf-8")
   .split("\n")
   .map((input) => {
     const semiColon = input.indexOf(":");
