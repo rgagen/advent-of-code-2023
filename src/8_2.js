@@ -24,7 +24,7 @@ class Directions {
   }
 }
 
-const directions = new Directions(input[0]);
+const directionInput = input[0];
 input.splice(0, 2);
 
 function parseLine(line) {
@@ -34,7 +34,7 @@ function parseLine(line) {
 }
 
 const map = {};
-const currentLocations = [];
+const startPositions = [];
 for (const line of input) {
   const match = parseLine(line);
   if (match === null) {
@@ -42,22 +42,38 @@ for (const line of input) {
   }
   map[match.key] = match;
   if (/..A/.test(match.key)) {
-    currentLocations.push(match.key);
+    startPositions.push(match.key);
   }
 }
 
-function isDone(testLocations) {
-  const results = testLocations.map((value) => /..Z/.test(value));
-  return results.every(Boolean);
-}
-
-while (!isDone(currentLocations)) {
-  const nextDirection = directions.nextDirection();
-
-  for (let i = 0; i < currentLocations.length; i++) {
-    const currentNode = map[currentLocations[i]];
-    currentLocations[i] = currentNode[nextDirection];
+function lowestHit(startPosition) {
+  const directions = new Directions(directionInput);
+  let currentKey = startPosition;
+  const destinationRegex = /..Z/;
+  while (!destinationRegex.test(currentKey)) {
+    const nextDirection = directions.nextDirection();
+    const currentNode = map[currentKey];
+    currentKey = currentNode[nextDirection];
   }
+  return directions.totalSteps;
 }
 
-console.log(directions.totalSteps);
+console.log();
+
+outputToFirstHit = [];
+for (const startPosition of startPositions) {
+  outputToFirstHit.push(lowestHit(startPosition));
+}
+
+console.log(outputToFirstHit);
+
+function gcd(a, b) {
+  return !b ? a : gcd(b, a % b);
+}
+
+function lcm(a, b) {
+  return (a * b) / gcd(a, b);
+}
+
+const lcmOutput = outputToFirstHit.reduce((acc, val) => lcm(acc, val));
+console.log(lcmOutput);
