@@ -40,21 +40,31 @@ class Point {
     // console.log("Moving north");
   }
 
-  goBack() {
-    switch (this.previous) {
+  moveByDirectionCode(directionCode) {
+    switch (directionCode) {
       case "E":
         this.east();
-        break;
+        return true;
       case "W":
         this.west();
-        break;
+        return true;
       case "S":
         this.south();
-        break;
+        return true;
       case "N":
         this.north();
-        break;
+        return true;
+      default:
+        return false;
     }
+  }
+
+  goBack() {
+    this.moveByDirectionCode(this.previous);
+  }
+
+  checkEquality(point) {
+    return this.x === point.x && this.y === point.y;
   }
 }
 
@@ -65,7 +75,11 @@ class Map {
     this.yBound = input.length;
     this.start = this.setStart();
     this.position = this.start.clone();
-    this.startingDirections = this.findConnections(this.start);
+    this.pipePoints = [this.start.clone()];
+    this.startingDirections = this.findStartConnections(this.start);
+    while (this.nextPipeStep()) {
+      this.pipePoints.push(this.position.clone());
+    }
   }
 
   setStart() {
@@ -79,15 +93,14 @@ class Map {
   }
 
   getPipe(point) {
-    const output = this.map[point.y][point.x];
-    if (output) {
-      return output;
-    } else {
-      return ".";
+    const row = this.map[point.y];
+    if (row) {
+      return this.map[point.y][point.x];
     }
+    return undefined;
   }
 
-  findConnections() {
+  findStartConnections() {
     // console.log("Finding start connections!");
     const searchPoint = this.position.clone();
     const connections = [];
@@ -123,36 +136,20 @@ class Map {
     return connections;
   }
 
-  nextStep() {
+  nextPipeStep() {
     const currentChar = this.getPipe(this.position);
+
+    if (currentChar === "." || !currentChar) {
+      throw new Error("Off track!");
+    }
 
     // Handle Start
     if (currentChar === "S" && this.position.counter !== 0) {
       // console.log("Back at the start");
       return false;
     } else if (currentChar === "S") {
-      switch (this.startingDirections[0]) {
-        case "N":
-          this.position.north();
-          break;
-        case "E":
-          this.position.east();
-          break;
-        case "S":
-          this.position.south();
-          break;
-        case "W":
-          this.position.west();
-          break;
-        default:
-          throw new Error("No starting direction!");
-      }
+      this.position.moveByDirectionCode(this.startingDirections[0]);
       return true;
-    }
-
-    // Handle Off Track Error
-    if (currentChar === ".") {
-      throw new Error("Off track!");
     }
 
     switch (this.position.previous) {
@@ -221,13 +218,58 @@ class Map {
     }
     return true;
   }
+
+  exploreSpace(startPoint) {
+    const pointsToSearch = [startPoint.clone()];
+    const pointsSearched = [];
+    const includedPoints = [];
+    let edgeDetected = false;
+
+    do {
+      const currentPoint = pointsToSearch.pop();
+      pointsSearched.push(currentPoint.clone());
+
+      const char = this.getPipe(currentPoint);
+      if (!char) {
+        edgeDetected = true;
+        continue;
+      }
+
+      let pipePoint = false;
+      for (const point of this.pipePoints) {
+        pipePoint = pipePoint || point.checkEquality(currentPoint);
+      }
+      if (pipePoint) {
+        continue;
+      }
+
+      includedPoints.push(currentPoint.clone());
+
+      const searchDirections = ["N", "S", "E", "W"];
+      for (const direction of searchDirections) {
+        currentPoint.moveByDirectionCode(direction);
+
+        let alreadyKnown = false;
+        for (const point of pointsSearched) {
+          alreadyKnown = alreadyKnown || point.checkEquality(currentPoint);
+        }
+        if (alreadyKnown) {
+          currentPoint.goBack();
+          continue;
+        }
+
+        pointsToSearch.push(currentPoint.clone());
+        currentPoint.goBack();
+      }
+    } while (pointsToSearch.length > 0);
+
+    return includedPoints;
+  }
 }
 
-const input = fs.readFileSync("../input/input10.txt", "utf-8").split("\n");
+const input = fs.readFileSync("../input/input10_test.txt", "utf-8").split("\n");
 let map = new Map(input);
 
-while (map.nextStep()) {
-  // console.log(map.position.counter);
-}
-
 console.log(map.position.counter / 2);
+
+console.log(map.exploreSpace(new Point(3, 3)));
