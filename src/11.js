@@ -1,8 +1,8 @@
 const fs = require("fs");
 
-const input = fs.readFileSync("../input/input11_test.txt", "utf-8").split("\n");
+const input = fs.readFileSync("../input/input11.txt", "utf-8").split("\n");
 
-const xToBeDoubled = [];
+const emptyXIndices = [];
 for (let x = 0; x < input[0].length; x++) {
   let galaxyDetected = false;
   for (let y = 0; y < input.length; y++) {
@@ -12,11 +12,11 @@ for (let x = 0; x < input[0].length; x++) {
     }
   }
   if (!galaxyDetected) {
-    xToBeDoubled.push(x);
+    emptyXIndices.push(x);
   }
 }
 
-const yToBeDoubled = [];
+const emptyYIndices = [];
 for (let y = 0; y < input.length; y++) {
   let galaxyDetected = false;
   for (let x = 0; x < input[0].length; x++) {
@@ -26,26 +26,12 @@ for (let y = 0; y < input.length; y++) {
     }
   }
   if (!galaxyDetected) {
-    yToBeDoubled.push(y);
+    emptyYIndices.push(y);
   }
 }
 
-console.log(xToBeDoubled);
-console.log(yToBeDoubled);
-
-for (let [y, line] of input.entries()) {
-  for (const [i, x] of xToBeDoubled.entries()) {
-    let index = i + x;
-    line = line.substring(0, index) + "." + line.substring(index);
-  }
-  input[y] = line;
-}
-
-for (let i = 0; i < yToBeDoubled.length; i++) {
-  let index = i + yToBeDoubled[i];
-  let line = "".padStart(input[0].length, ".");
-  input.splice(index, 0, line);
-}
+console.log(emptyXIndices);
+console.log(emptyYIndices);
 
 class Point {
   constructor(x, y) {
@@ -65,13 +51,37 @@ for (let y = 0; y < input.length; y++) {
 }
 
 const shortestPaths = [];
+const expansionFactor = 999999;
 
 while (galaxyArray.length > 0) {
   const currentGalaxy = galaxyArray.pop();
   for (let galaxy of galaxyArray) {
+    let xExpansion = 0;
+    for (const x of emptyXIndices) {
+      if (
+        (x < currentGalaxy.x && x > galaxy.x) ||
+        (x > currentGalaxy.x && x < galaxy.x)
+      ) {
+        xExpansion += 1;
+      }
+    }
+
+    let yExpansion = 0;
+    for (const y of emptyYIndices) {
+      if (
+        (y < currentGalaxy.y && y > galaxy.y) ||
+        (y > currentGalaxy.y && y < galaxy.y)
+      ) {
+        yExpansion += 1;
+      }
+    }
+
     let pathLength =
       Math.abs(currentGalaxy.x - galaxy.x) +
-      Math.abs(currentGalaxy.y - galaxy.y);
+      xExpansion * expansionFactor +
+      Math.abs(currentGalaxy.y - galaxy.y) +
+      yExpansion * expansionFactor;
+
     shortestPaths.push(pathLength);
   }
 }
