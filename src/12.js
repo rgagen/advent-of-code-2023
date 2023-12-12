@@ -6,13 +6,15 @@ class springRow {
   knownSpringIndex;
   possibleSpringIndex;
 
-  constructor(inputLine) {
+  constructor(inputLine, expansionFactor = 0) {
     [this.row, this.groups] = this.parseLine(inputLine);
+    if (expansionFactor) {
+      this.expandRows(expansionFactor);
+    }
     [this.knownSpringIndex, this.possibleSpringIndex] = this.findSpringIndex(
       this.row,
     );
-    this.missingSprings =
-      this.groups.reduce((acc, x) => acc + x) - this.knownSpringIndex.length;
+    this.missingSprings = this.findNumMissingSprings();
   }
 
   parseLine(line) {
@@ -33,6 +35,12 @@ class springRow {
     return [line[0], groups];
   }
 
+  findNumMissingSprings() {
+    return (
+      this.groups.reduce((acc, x) => acc + x) - this.knownSpringIndex.length
+    );
+  }
+
   findSpringIndex(row) {
     const possibleSpringIndex = [];
     const knownSpringIndex = [];
@@ -46,25 +54,33 @@ class springRow {
     return [knownSpringIndex, possibleSpringIndex];
   }
 
-  selectRandomPossibleSprings() {
-    const shuffled = this.possibleSpringIndex.sort(() => 0.5 - Math.random());
-    return shuffled.slice(0, this.missingSprings);
+  expandRows(n) {
+    const row = this.row;
+    const groups = this.groups;
+    for (let i = 1; i < n; i++) {
+      this.row += "?" + row;
+      this.groups = this.groups.concat(groups);
+    }
   }
 
-  createPossibleSolution() {
-    const selectedPossibleSprings = this.selectRandomPossibleSprings();
-    let possibleSolution = "";
-    for (let i = 0; i < this.row.length; i++) {
-      if (
-        selectedPossibleSprings.includes(i) ||
-        this.knownSpringIndex.includes(i)
-      ) {
-        possibleSolution += "#";
-      } else {
-        possibleSolution += ".";
+  arrayCombinations(arr, k) {
+    const result = [];
+
+    function generateCombinations(current, start) {
+      if (current.length === k) {
+        result.push([...current]);
+        return;
+      }
+
+      for (let i = start; i < arr.length; i++) {
+        current.push(arr[i]);
+        generateCombinations(current, i + 1);
+        current.pop();
       }
     }
-    return possibleSolution;
+
+    generateCombinations([], 0);
+    return result;
   }
 
   checkSolution(solution) {
@@ -85,29 +101,43 @@ class springRow {
     return true;
   }
 
-  bruteForceSolutions(n) {
-    let solutionSet = new Set();
-    for (let i = 0; i < n; i++) {
-      const solution = this.createPossibleSolution();
-      if (this.checkSolution(solution)) {
-        solutionSet.add(solution);
+  findAllSolutions() {
+    const combinations = this.arrayCombinations(
+      this.possibleSpringIndex,
+      this.missingSprings,
+    );
+    let solutions = 0;
+
+    for (const combination of combinations) {
+      let possibleSolution = "";
+      for (let i = 0; i < this.row.length; i++) {
+        if (combination.includes(i) || this.knownSpringIndex.includes(i)) {
+          possibleSolution += "#";
+        } else {
+          possibleSolution += ".";
+        }
+      }
+      if (this.checkSolution(possibleSolution)) {
+        solutions += 1;
       }
     }
-    this.solutionSet = solutionSet;
+
+    this.solutions = solutions;
   }
 }
 
-const input = fs.readFileSync("../input/input12.txt", "utf-8").split("\n");
+const input = fs.readFileSync("../input/input12_test.txt", "utf-8").split("\n");
 const rows = [];
 
 for (const line of input) {
-  rows.push(new springRow(line));
+  rows.push(new springRow(line, 5));
 }
 
 let total = 0;
-for (const springRow of rows) {
-  springRow.bruteForceSolutions(1000000);
-  total += springRow.solutionSet.size;
+while (rows.length > 0) {
+  const springRow = rows.pop();
+  springRow.findAllSolutions();
+  total += springRow.solutions;
 }
 
 console.log(total);
